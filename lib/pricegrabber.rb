@@ -1,5 +1,4 @@
-require "pricegrabber/version"
-
-module Pricegrabber
-  # Your code goes here...
-end
+require 'pricegrabber/version'
+require 'pricegrabber/client'
+require 'pricegrabber/request'
+require 'pricegrabber/response_handler'
