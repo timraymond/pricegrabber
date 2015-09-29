@@ -28,4 +28,23 @@ describe PriceGrabber::ResponseHandler do
 
     expect(results.first).to eq({:name => "Rare Candy", :price => "12345 Credits"})
   end
+
+  it 'throws API Errors if an error message is encountered' do
+    results = []
+    handler = described_class.new(['name', 'price'], results)
+
+    expect do
+      handler.start_document
+
+      handler.start_element "document"
+
+      handler.start_element "error"
+      handler.characters "The Frobinator has exceeded its maximum working range"
+      handler.end_element "error"
+
+      handler.end_element "document"
+
+      handler.end_document
+    end.to raise_exception(PriceGrabber::APIError, "The Frobinator has exceeded its maximum working range")
+  end
 end

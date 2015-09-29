@@ -4,12 +4,13 @@ require 'nokogiri'
 
 module PriceGrabber
   class Request
-    def initialize(version:, pid:, key:, asin: nil, q: nil, masterid: nil, driver: :net_http)
+    def initialize(version:, pid:, key:, asin: nil, q: nil, masterid: nil, upc: nil, driver: :net_http)
       @version = version
       @pid = pid
       @key = key
       @asin = asin
       @q = q
+      @upc = upc
       @masterid = [*masterid]
       @driver = driver
     end
@@ -25,6 +26,7 @@ module PriceGrabber
         key,
         asin,
         q,
+        upc,
         masterid,
       ].compact.sort.join("&")
       uri
@@ -42,15 +44,10 @@ module PriceGrabber
       request = HTTPI::Request.new
       request.url = to_s
       resp = HTTPI.get(request, @driver)
-      case resp.code
-      when 200
-        result_set = []
-        parser = Nokogiri::XML::SAX::Parser.new(ResponseHandler.new(@wants, result_set))
-        parser.parse(resp.body)
-        result_set
-      when 500..600
-        fail PriceGrabber::APIError
-      end
+      result_set = []
+      parser = Nokogiri::XML::SAX::Parser.new(ResponseHandler.new(@wants, result_set))
+      parser.parse(resp.body)
+      result_set
     end
 
     def pluck(*attributes)
@@ -81,6 +78,12 @@ module PriceGrabber
     def q
       if @q
         "q=#{@q.gsub(/\s/, '+')}"
+      end
+    end
+
+    def upc
+      if @upc
+        "upc=#{@upc}"
       end
     end
 
