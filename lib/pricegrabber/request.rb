@@ -46,17 +46,21 @@ module PriceGrabber
       request.url = to_s
       resp = HTTPI.get(request, @driver)
       resp_hash = Hash.from_xml(resp.body)
-      results = {}
-      @wants.map do |want|
-        parts = want.split(".")
-        curr = parts.shift
-        curr_value = resp_hash
-        while curr && curr_value
-          curr_value = curr_value[curr]
+      results = []
+      [resp_hash["document"]["product"]].flatten.each do |product|
+        curr_result = {}
+        @wants.map do |want|
+          parts = want.split(".")
           curr = parts.shift
-        end
+          curr_value = product
+          while curr && curr_value
+            curr_value = curr_value[curr]
+            curr = parts.shift
+          end
 
-        results[want] = curr_value
+          curr_result[want] = curr_value
+        end
+        results << curr_result
       end
       results
     end
