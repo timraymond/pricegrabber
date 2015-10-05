@@ -1,6 +1,6 @@
 require 'uri'
 require 'httpi'
-require 'nokogiri'
+require 'active_support/core_ext/hash/conversions'
 
 module PriceGrabber
   class Request
@@ -13,6 +13,7 @@ module PriceGrabber
       @upc = upc
       @masterid = [*masterid]
       @driver = driver
+      @wants = []
     end
 
     def to_uri
@@ -44,10 +45,20 @@ module PriceGrabber
       request = HTTPI::Request.new
       request.url = to_s
       resp = HTTPI.get(request, @driver)
-      result_set = []
-      parser = Nokogiri::XML::SAX::Parser.new(ResponseHandler.new(@wants, result_set))
-      parser.parse(resp.body)
-      result_set
+      resp_hash = Hash.from_xml(resp.body)
+      results = {}
+      @wants.map do |want|
+        parts = want.split(".")
+        curr = parts.shift
+        curr_value = resp_hash
+        while curr && curr_value
+          curr_value = curr_value[curr]
+          curr = parts.shift
+        end
+
+        results[want] = curr_value
+      end
+      results
     end
 
     def pluck(*attributes)
