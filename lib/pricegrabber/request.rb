@@ -1,6 +1,5 @@
 require 'uri'
 require 'httpi'
-require 'active_support/core_ext/hash/conversions'
 
 module PriceGrabber
   class Request
@@ -45,24 +44,7 @@ module PriceGrabber
       request = HTTPI::Request.new
       request.url = to_s
       resp = HTTPI.get(request, @driver)
-      resp_hash = Hash.from_xml(resp.body)
-      results = []
-      [resp_hash["document"]["product"]].flatten.each do |product|
-        curr_result = {}
-        @wants.map do |want|
-          parts = want.split(".")
-          curr = parts.shift
-          curr_value = product
-          while curr && curr_value
-            curr_value = curr_value[curr]
-            curr = parts.shift
-          end
-
-          curr_result[want] = curr_value
-        end
-        results << curr_result
-      end
-      results
+      PriceGrabber::Response.new(resp, @wants)
     end
 
     def pluck(*attributes)

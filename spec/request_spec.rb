@@ -45,7 +45,9 @@ describe PriceGrabber::Request do
 
     it "allows attribute plucking" do
       req = described_class.new(version: '2.55', pid: '8675309', key: '123456', asin: 'B007ARLMI0', driver: :mock_driver).pluck(:title, :url)
-      expect(req.call.first).to eq({"title" => "S23B300B 23-inch LED LCD Monitor with MagicAngle - 1920 x 1080 - 1000:1 - 250 cd/m2 - 5 ms - DVI/VGA - Black", "url" => "http://reviewed.api.pgpartner.com/mrdr.php?url=http%3A%2F%2Freviewed.api.pgpartner.com%2Fsearch_getprod.php%3Fmasterid%3D962261805"})
+      resp = req.call.first
+      expect(resp.title).to eq("S23B300B 23-inch LED LCD Monitor with MagicAngle - 1920 x 1080 - 1000:1 - 250 cd/m2 - 5 ms - DVI/VGA - Black")
+      expect(resp.url).to eq("http://reviewed.api.pgpartner.com/mrdr.php?url=http%3A%2F%2Freviewed.api.pgpartner.com%2Fsearch_getprod.php%3Fmasterid%3D962261805")
     end
   end
 end
