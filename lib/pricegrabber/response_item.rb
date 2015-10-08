@@ -19,5 +19,11 @@ module PriceGrabber
       end
       ins
     end
+
+    def empty?
+      instance_variables.inject(true) do |is_empty, ivar_name|
+        is_empty && !instance_variable_get(ivar_name)
+      end
+    end
   end
 end

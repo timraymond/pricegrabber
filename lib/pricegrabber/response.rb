@@ -25,7 +25,7 @@ module PriceGrabber
 
           curr_result.public_send(:"#{want.tr(".", "_")}=", curr_value)
         end
-        @results << curr_result
+        @results << curr_result unless curr_result.empty?
       end
     end
 

@@ -3,6 +3,7 @@ require 'spec_helper'
 describe PriceGrabber::Response do
   let(:valid_xml) do
     <<-XML
+    <?xml version="1.0"?>
     <document>
       <product>
         <title>Super Soaker</title>
@@ -17,8 +18,20 @@ describe PriceGrabber::Response do
 
   let(:error_xml) do
     <<-XML
+    <?xml version="1.0"?>
     <document>
       <error>There was an error</error>
+    </document>
+    XML
+  end
+
+  let(:no_offers) do
+    <<-XML
+    <?xml version="1.0"?>
+    <document>
+      <product>
+        <title>Super Soaker</title>
+      </product>
     </document>
     XML
   end
@@ -46,6 +59,32 @@ describe PriceGrabber::Response do
       http_resp = HTTPI::Response.new(200, {}, error_xml)
       response = described_class.new(http_resp, ["offer.retailer", "offer.price"])
       expect(response.successful?).to eq(false)
+    end
+  end
+
+  context 'with no offers for a product' do
+    context 'when asking for only offer fields' do
+      it 'iterates zero times' do
+        http_resp = HTTPI::Response.new(200, {}, no_offers)
+        response = described_class.new(http_resp, ["offer.retailer", "offer.price"])
+        counter = 0
+        response.each do
+          counter += 1
+        end
+        expect(counter).to eq(0)
+      end
+    end
+
+    context 'when asking for product and offer fields' do
+      it 'iterates over found results' do
+        http_resp = HTTPI::Response.new(200, {}, no_offers)
+        response = described_class.new(http_resp, ["title", "offer.price"])
+        counter = 0
+        response.each do
+          counter += 1
+        end
+        expect(counter).to eq(1)
+      end
     end
   end
 end
