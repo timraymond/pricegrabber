@@ -35,6 +35,18 @@ describe PriceGrabber::Request do
       req = described_class.new(version: '2.55', pid: '8675309', key: '123456', asin: 'B007ARLMI0')
       expect(req.to_curl).to eq('curl -G \'http://sws.api.pricegrabber.com/search_xml.php?asin=B007ARLMI0&key=123456&pid=8675309&version=2.55\'')
     end
+
+    it 'switches between production and staging urls' do
+      req = described_class.new(version: '2.55', pid: '8675309', key: '123456', asin: 'B007ARLMI0', environment: :production)
+      expect(req.to_s).to eq('http://sws.pricegrabber.com/search_xml.php?asin=B007ARLMI0&key=123456&pid=8675309&version=2.55')
+    end
+  end
+
+  describe 'environment' do
+    it 'reports what environment the request is for' do
+      req = described_class.new(version: '2.55', pid: '8675309', key: '123456', asin: 'B007ARLMI0', environment: :production)
+      expect(req.environment).to eq(:production)
+    end
   end
 
   describe 'query execution' do

@@ -3,7 +3,10 @@ require 'httpi'
 
 module PriceGrabber
   class Request
-    def initialize(version:, pid:, key:, asin: nil, q: nil, masterid: nil, upc: nil, driver: :net_http)
+    attr_reader :environment
+
+    def initialize(version:, pid:, key:, asin: nil, q: nil, masterid: nil, upc: nil, environment: :staging, driver: :net_http)
+      @environment = environment
       @version = version
       @pid = pid
       @key = key
@@ -18,7 +21,11 @@ module PriceGrabber
     def to_uri
       uri = ::URI::HTTP.build({})
       uri.scheme = "http"
-      uri.host = "sws.api.pricegrabber.com"
+      if @environment == :production
+        uri.host = "sws.pricegrabber.com"
+      else
+        uri.host = "sws.api.pricegrabber.com"
+      end
       uri.path = "/search_xml.php"
       uri.query = [
         version,
