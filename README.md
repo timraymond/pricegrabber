@@ -1,3 +1,7 @@
+
+# NOTICE
+This gem is no longer receiving updates as the Pricegrabber API that it was targeting is no longer available. Consequently, this repository has been archived.
+
 # Pricegrabber
 
 Pricegrabber is a gem that allows you to request product and pricing information from the Pricegrabber API.
